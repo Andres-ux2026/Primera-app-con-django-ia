@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% block title %}Calificar - {{ submission.student.get_full_name }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:teacher_subject_list' %}">Materias</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'core:teacher_assignment_list' submission.assignment.subject.pk %}">Tareas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'core:teacher_grade_submissions' submission.assignment.pk %}">Entregas</a></li>
+        <li class="breadcrumb-item active">Calificar - {{ submission.student.get_full_name }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Tarea: {{ submission.assignment.title }}</h4>
+            </div>
+            <div class="card-body">
+                <h5>Alumno: {{ submission.student.get_full_name }}</h5>
+                <p><strong>Entregado:</strong> {{ submission.submitted_at|date:'d/m/Y H:i' }}</p>
+                {% if submission.comment %}
+                    <p><strong>Comentario del alumno:</strong> {{ submission.comment }}</p>
+                {% endif %}
+                {% if submission.file %}
+                    <a href="{{ submission.file.url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark"></i> Ver archivo entregado
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Calificar</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_grade" class="form-label">Calificación (1-10)</label>
+                        <input type="number" name="grade" id="id_grade" class="form-control"
+                               min="1" max="10" step="0.01"
+                               value="{{ submission.grade|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_feedback" class="form-label">Retroalimentación</label>
+                        <textarea name="feedback" id="id_feedback" class="form-control" rows="4">{{ submission.feedback }}</textarea>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'core:teacher_grade_submissions' submission.assignment.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Guardar Calificación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

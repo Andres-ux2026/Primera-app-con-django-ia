@@ -1,0 +1,114 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard - {{ student.get_full_name }}{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+        <p class="text-muted">Bienvenido, {{ student.get_full_name }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="card bg-primary text-white">
+            <div class="card-body py-2">
+                <h5 class="mb-0">Promedio General: {{ overall_avg|floatformat:2|default:'-' }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Últimas Notas</h5>
+            </div>
+            <div class="card-body">
+                {% if notes %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Materia</th>
+                                    <th>Nota</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in notes %}
+                                    <tr>
+                                        <td>{{ note.subject.name }}</td>
+                                        <td>
+                                            <span class="badge {% if note.value >= 7 %}bg-success{% elif note.value >= 4 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ note.value }}
+                                            </span>
+                                        </td>
+                                        <td>{{ note.date|date:'d/m/Y' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'core:student_grades' %}" class="btn btn-outline-info btn-sm">Ver todas</a>
+                {% else %}
+                    <p class="text-muted">No hay notas cargadas aún.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-list-task"></i> Tareas Pendientes</h5>
+            </div>
+            <div class="card-body">
+                {% if pending_assignments %}
+                    <ul class="list-group list-group-flush">
+                        {% for task in pending_assignments %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ task.title }}</strong><br>
+                                    <small class="text-muted">{{ task.subject.name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="d-block text-danger">{{ task.due_date|date:'d/m/Y' }}</small>
+                                    <a href="{% url 'core:student_assignment_detail' task.pk %}" class="btn btn-sm btn-outline-warning">Ver</a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No hay tareas pendientes. ¡Buen trabajo!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Promedio por Materia</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for item in subject_averages %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <h6>{{ item.subject__name }}</h6>
+                                    <h3 class="{% if item.avg >= 7 %}text-success{% elif item.avg >= 4 %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ item.avg|floatformat:2 }}
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">No hay datos disponibles.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

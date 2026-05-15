@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Mis Notas{% endblock %}
+{% block content %}
+<h2><i class="bi bi-clipboard-data"></i> Mis Notas</h2>
+<hr>
+
+{% if grades_by_subject %}
+    {% for subject, data in grades_by_subject.items %}
+        <div class="card shadow mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center
+                {% if data.average >= 7 %}bg-success text-white
+                {% elif data.average >= 4 %}bg-warning
+                {% else %}bg-danger text-white{% endif %}">
+                <h5 class="mb-0">{{ subject.name }} - {{ subject.school_level.name }}</h5>
+                <h5 class="mb-0">Promedio: {{ data.average|floatformat:2|default:'-' }}</h5>
+            </div>
+            <div class="card-body">
+                {% if data.notes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nota</th>
+                                    <th>Profesor</th>
+                                    <th>Comentario</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for note in data.notes %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>
+                                            <span class="badge fs-6 {% if note.value >= 7 %}bg-success{% elif note.value >= 4 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ note.value }}
+                                            </span>
+                                        </td>
+                                        <td>{{ note.teacher.get_full_name }}</td>
+                                        <td>{{ note.comment|default:'-' }}</td>
+                                        <td>{{ note.date|date:'d/m/Y' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No hay notas registradas para esta materia.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-emoji-neutral display-1 text-muted"></i>
+        <p class="lead mt-3">No tienes notas registradas aún.</p>
+    </div>
+{% endif %}
+{% endblock %}

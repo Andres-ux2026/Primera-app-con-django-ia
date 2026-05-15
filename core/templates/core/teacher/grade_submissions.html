@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+{% block title %}Entregas - {{ assignment.title }}{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:teacher_subject_list' %}">Materias</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'core:teacher_assignment_list' assignment.subject.pk %}">{{ assignment.subject.name }} - Tareas</a></li>
+        <li class="breadcrumb-item active">{{ assignment.title }} - Entregas</li>
+    </ol>
+</nav>
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">{{ assignment.title }}</h4>
+    </div>
+    <div class="card-body">
+        <p><strong>Materia:</strong> {{ assignment.subject.name }}</p>
+        <p><strong>Fecha de entrega:</strong> <span class="text-danger">{{ assignment.due_date|date:'d/m/Y H:i' }}</span></p>
+        <p><strong>Total de entregas:</strong> {{ submissions|length }}</p>
+    </div>
+</div>
+
+{% if submissions %}
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-check-circle"></i> Entregas de Alumnos</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Alumno</th>
+                            <th>Entregado</th>
+                            <th>Archivo</th>
+                            <th>Calificación</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in submissions %}
+                            <tr>
+                                <td>{{ submission.student.get_full_name }}</td>
+                                <td>{{ submission.submitted_at|date:'d/m/Y H:i' }}</td>
+                                <td>
+                                    {% if submission.file %}
+                                        <a href="{{ submission.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-file-earmark"></i> Ver
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Sin archivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if submission.grade %}
+                                        <span class="badge fs-6 {% if submission.grade >= 7 %}bg-success{% elif submission.grade >= 4 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ submission.grade }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Pendiente</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'core:teacher_grade_submission' submission.pk %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-pencil-square"></i> Calificar
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p class="lead mt-3">No hay entregas para esta tarea aún.</p>
+    </div>
+{% endif %}
+{% endblock %}

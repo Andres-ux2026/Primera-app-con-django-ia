@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:student_assignments' %}">Tareas</a></li>
+                <li class="breadcrumb-item active">{{ assignment.title }}</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{{ assignment.title }}</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Materia:</strong> {{ assignment.subject.name }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Profesor:</strong> {{ assignment.teacher.get_full_name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Fecha de entrega:</strong>
+                        <span class="text-danger">{{ assignment.due_date|date:'d/m/Y H:i' }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Curso:</strong> {{ assignment.subject.school_level.name }}
+                    </div>
+                </div>
+
+                <hr>
+                <h5>Descripción</h5>
+                <p>{{ assignment.description|linebreaks }}</p>
+
+                {% if assignment.file %}
+                    <a href="{{ assignment.file.url }}" class="btn btn-outline-primary" target="_blank">
+                        <i class="bi bi-paperclip"></i> Archivo adjunto
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if submission %}
+            <div class="card shadow mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check-circle"></i> Tarea Entregada</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Fecha de entrega:</strong> {{ submission.submitted_at|date:'d/m/Y H:i' }}</p>
+                    {% if submission.comment %}
+                        <p><strong>Comentario:</strong> {{ submission.comment }}</p>
+                    {% endif %}
+                    {% if submission.file %}
+                        <a href="{{ submission.file.url }}" class="btn btn-outline-success" target="_blank">
+                            <i class="bi bi-file-earmark"></i> Ver archivo entregado
+                        </a>
+                    {% endif %}
+                    {% if submission.grade %}
+                        <hr>
+                        <h5>Calificación:
+                            <span class="badge fs-5 {% if submission.grade >= 7 %}bg-success{% elif submission.grade >= 4 %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ submission.grade }}
+                            </span>
+                        </h5>
+                        {% if submission.feedback %}
+                            <p><strong>Retroalimentación:</strong> {{ submission.feedback }}</p>
+                        {% endif %}
+                        <p class="text-muted small">Calificado el {{ submission.graded_at|date:'d/m/Y' }}</p>
+                    {% else %}
+                        <span class="badge bg-secondary">Sin calificar aún</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Entregar Tarea</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_file" class="form-label">Archivo</label>
+                            <input type="file" name="file" id="id_file" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_comment" class="form-label">Comentario (opcional)</label>
+                            <textarea name="comment" id="id_comment" class="form-control" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Entregar Tarea
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
